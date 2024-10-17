@@ -1,0 +1,85 @@
+---
+title: "assignment02"
+author: "florencelei"
+date: "2024-10-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1 Data Wrangling
+## 1.1 Select and filter(Q1)
+```{r}
+library(tidyverse)
+library(Stat2Data)
+data("Hawks")
+
+hSF = Hawks %>%
+  filter(Species=="RT" & Weight>=1000) %>%
+  select(Wing, Weight, Tail)
+head(hSF, 5)
+```
+
+## 1.1 Select and filter(Q2)
+```{r}
+hSF%>%nrow()
+```
+
+## 1.2 The arrange function
+```{r}
+head(arrange(hSF, Wing), 5)
+```
+
+## 1.3 Join and rename functions(Q1)
+```{r}
+species_code = c("CH", "RT", "SS")
+species_name_full = c("Cooper's", "Red-tailed", "Sharp-shinned")
+hawkSpeciesNameCodes = data.frame(species_code, species_name_full)
+hawkSpeciesNameCodes
+```
+
+## 1.3 Join and rename functions(Q2)
+```{r}
+hawksFullName = Hawks %>%
+  left_join(hawkSpeciesNameCodes %>% rename(Species = species_code)) %>%
+  select(-Species) %>%
+  rename(Species = species_name_full)
+```
+
+## 1.3 Join and rename functions(Q3)
+```{r}
+hawksFullName %>%
+  select(Species,Wing,Weight) %>%
+  head(7)
+```
+
+## 1.4 The mutate function(Q1)
+```{r}
+hawkswithBMI = Hawks %>%
+  mutate(bird_BMI=1000*Weight/Wing^2) %>%
+  select(Species, bird_BMI) %>%
+  arrange(desc(bird_BMI))
+hawkswithBMI %>% head(8)
+```
+
+## 1.5 Summarize and group-by functions(Q1)
+```{r}
+hawksFullName %>%
+  group_by(Species) %>%
+  summarize(num_rows=n(),
+            mn_wing=mean(Wing, na.rm = TRUE),
+            md_wing=median(Wing, na.rm = TRUE),
+            t_mn_wing=mean(Wing, na.rm = TRUE, trim = 0.1),
+            b_wt_ratio=max(Wing/Tail, na.rm = TRUE))
+```
+
+## 1.5 Summarize and group-by functions(Q2)
+```{r}
+hawksFullName %>%
+  select(Species, Wing, Weight, Culmen, Hallux, Tail, StandardTail, Tarsus, Crop) %>%
+  group_by(Species) %>%
+  summarize(across(everything(), ~sum(is.na(.x)))) %>%
+  head()
+```
